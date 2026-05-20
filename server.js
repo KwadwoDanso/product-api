@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 const connectDB = require("./db/connection");
+const productRoutes = require("./routes/productRoutes");
 
 // Local Environmental Variables
 const PORT = process.env.PORT || 3001;
@@ -18,6 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
     res.send("Server's up and running...");
 });
+
+app.use("/api/products", productRoutes);
 
 // PORT
 app.listen(PORT, () => {
