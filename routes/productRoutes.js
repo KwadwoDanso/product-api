@@ -4,7 +4,42 @@ const router = express.Router();
 const Product = require("../models/Product");
 
 // INDUCES
+// INDEX - GET /api/products (with filter, sort, pagination)
+router.get("/", async (req, res) => {
+    try {
+        const { category, minPrice, maxPrice, sortBy, page, limit } = req.query;
 
+        // Build filter object dynamically
+        const filter = {};
+        if (category) filter.category = category;
+        if (minPrice || maxPrice) {
+            filter.price = {};
+            if (minPrice) filter.price.$gte = Number(minPrice);
+            if (maxPrice) filter.price.$lte = Number(maxPrice);
+        }
+
+        // Build sort object
+        const sort = {};
+        if (sortBy === "price_asc") sort.price = 1;
+        if (sortBy === "price_desc") sort.price = -1;
+
+        // Pagination
+        const pageNum = Number(page) || 1;
+        const limitNum = Number(limit) || 10;
+        const skip = (pageNum - 1) * limitNum;
+
+        const products = await Product
+            .find(filter)
+            .sort(sort)
+            .skip(skip)
+            .limit(limitNum);
+
+        res.json(products);
+    } catch (error) {
+        console.error("Error fetching products: ", error);
+        res.status(500).json({ message: error.message });
+    }
+});
 // DELETE - DELETE /api/products/:id
 router.delete("/:id", async (req, res) => {
     try {
